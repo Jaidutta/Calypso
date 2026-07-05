@@ -1,4 +1,5 @@
-import express, {Express} from 'express';
+import express, { Express } from 'express';
+import { userRouter } from './routers/user.router.js';
 
 const app: Express = express();
 
@@ -9,4 +10,6 @@ app.get('/health', (_req, res) => {
   });
 });
 
-export {app};
+app.use("/api/users", userRouter); // if the route starts with /users, userRouter will handle it
+
+export { app };
