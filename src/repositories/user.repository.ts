@@ -1,5 +1,5 @@
 import {prisma} from "../config/database.js";
-import { CreateUserDto } from "../dtos/user.dto.js";
+import { CreateUserDto, UpdateUserDto } from "../dtos/user.dto.js";
 
 export async function getAll() {
     const users = await prisma.user.findMany();
@@ -30,4 +30,18 @@ export async function create(data: CreateUserDto) {
         data
     })
     return user;
+}
+
+export async function update(id: number, data: UpdateUserDto) {
+    const user = await prisma.user.update({
+        where: { id },
+        data
+    })
+    return user;
+}
+
+export async function remove(id: number) {
+    await prisma.user.delete({
+        where: { id }
+    })
 }
