@@ -1,6 +1,7 @@
 import express, { Express } from 'express';
 import { userRouter } from './routers/user.router.js';
 import { errorHandler } from './middlewares/error-handler.js';
+import { routeNotFound } from './middlewares/route-not-found.js';
 
 const app: Express = express();
 
@@ -25,5 +26,7 @@ app.use("/api/users", userRouter); // if the route starts with /users, userRoute
 
 // after all the routes, at the very end, 
 // this is where we mention our error-handling middleware
+
+app.use(routeNotFound)
 app.use(errorHandler)
 export { app };
