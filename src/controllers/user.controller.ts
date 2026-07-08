@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import {findAllUsers as findAllUserService} from "../services/user.service.js";
 import { findById as findByIdService } from "../services/user.service.js";
 import { sendSuccess } from "../utils/api-response.js";
+
+
 export async function findAllUsers(_req: Request, res: Response) {
     const response = await findAllUserService();
 
