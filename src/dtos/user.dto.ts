@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { badRequest } from "../utils/api-errors.js";
 
 export const createUserSchema = z.object({
     email: z.email("Invalid email address"),

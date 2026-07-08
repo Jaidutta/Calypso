@@ -1,4 +1,5 @@
 import {prisma} from "../config/database.js";
+import { CreateUserDto } from "../dtos/user.dto.js";
 
 export async function getAll() {
     const users = await prisma.user.findMany();
@@ -11,6 +12,22 @@ export async function getById(id: number) {
         where: {
             id  
         }
+    })
+    return user;
+}
+
+export async function getUserByEmail(email: string) {
+    const user = await prisma.user.findUnique({
+        where: {
+            email  
+        }
+    })
+    return user;
+}
+
+export async function create(data: CreateUserDto) {
+    const user = await prisma.user.create({
+        data
     })
     return user;
 }

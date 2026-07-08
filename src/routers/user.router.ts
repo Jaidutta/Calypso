@@ -7,4 +7,4 @@ export const userRouter: Router = Router();
 
 userRouter.get("/", findAllUsers)
 userRouter.get("/:id", findById)  
-userRouter.post("/",validate(createUserSchema), createUser)  // 
+userRouter.post("/",validate(createUserSchema), createUser)
