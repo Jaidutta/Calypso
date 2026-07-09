@@ -19,5 +19,28 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt // allows prisma to manage automatically
 
+  eventType EventType[]
+
   @@map("users")
+}
+
+// A user has many eventTypes, and an eventType belongs to one user (One to Many)
+model EventType {
+  id                  Int      @id @default(autoincrement())
+  hostId              Int
+  title               String
+  description         String?
+  durationMinutes     Int
+  isActive            Boolean  @default(true)
+  locationType        String   @default("online")
+  locationValue       String?
+  bufferBeforeMinutes Int      @default(0)
+  bufferAfterMinutes  Int      @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  // id of the User table is present as a hostId in my table
+  host User @relation(fields: [hostId], references: [id], onDelete: Cascade) // Cascade: If the user is deleted, all its eventTypes will be deleted
+
+  @@map("event_types")
 }
