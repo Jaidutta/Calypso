@@ -1,50 +1,66 @@
 import { z } from "zod";
 
 export const createEventTypeSchema = z.object({
-    hostId: z
-        .number()
-        .int("hostId must be an integer")
-        .positive("hostId must be positive"),
-
     title: z
         .string()
         .min(1, "Title is required")
-        .max(150, "Title is too long"),
+        .max(200, "Title must be of maximum 200 characters"),
 
     description: z
         .string()
-        .max(500, "Description cannot exceed 500 characters")
-        .optional()
-        .nullable(),
+        .max(1000, "Description cannot exceed 1000 characters")
+        .optional(),
 
     durationMinutes: z
         .number()
         .int("Duration must be an integer")
-        .min(1, "Duration must be at least 1 minute"),
+        .min(15, "Duration must be at least 1 minute")
+        .max(120, "Maximum Duration is 120 minutes")
+        .default(30),
+        
 
-    isActive: z.boolean().optional(),
+    isActive: z
+        .boolean()
+        .default(true),
 
-    locationType: z.string().optional(),
+    locationType: z
+        .enum(["online", "in-person"])
+        .default("online"),
 
     locationValue: z
         .string()
-        .max(255)
-        .optional()
-        .nullable(),
+        .optional(),
 
-    bufferBeforeMinutes: z.number().int().min(0).optional(),
+    bufferBeforeMinutes: z
+        .number()
+        .int("Buffer before must be an integer")
+        .min(0, "Buffer before cannot be negative")
+        .max(120, "Buffer before cannot be more than 120 minutes")
+        .default(0),
 
-    bufferAfterMinutes: z.number().int().min(0).optional(),
+    bufferAfterMinutes: z
+        .number()
+        .int("Buffer before must be an integer")
+        .min(0, "Buffer before cannot be negative")
+        .max(120, "Buffer before cannot be more than 120 minutes")
+        .default(0),
+    
+    slug: z
+        .string()
+        .min(1, "Slug is required")
+        .max(100, "Slug cannot exceed 100 characters")
+        .regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens")
+        
+        // why don't we have hostId here? It is because users are authenticated and userId is
+        // injected into the request 
 });
 
-export type CreateEventTypeDto = z.infer<typeof createEventTypeSchema>;
+
 
 export const updateEventTypeSchema = createEventTypeSchema
-    .partial()
-    .omit({ hostId: true })
-    .refine(
-        (data) => Object.keys(data).length > 0,
-        { message: "At least one field must be provided for patch updates" }
-    );
+    .partial() // it can have all the properties of createEventTypeSchema or a subset of them
 
+
+
+export type CreateEventTypeDto = z.infer<typeof createEventTypeSchema>;
 export type UpdateEventTypeDto = z.infer<typeof updateEventTypeSchema>;
