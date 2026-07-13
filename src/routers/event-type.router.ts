@@ -1,13 +1,15 @@
 import { Router } from "express";
-import {findByHost, findById, createEventType, updateEventType, deleteEventType}from "../controllers/event-type.controller.js";
-import { validateBody, validateParams } from "../middlewares/validate.js";
+import { create, getById, list, remove, update } from "../controllers/event-type.controller.js";
 import { createEventTypeSchema, updateEventTypeSchema } from "../dtos/event-type.dto.js";
-import { idParamSchema } from "../dtos/common.dto.js";
+import { requireUserId } from "../middlewares/require-user-id.js";
+import { validate } from "../middlewares/validate.js";
 
 export const eventTypeRouter: Router = Router();
 
-eventTypeRouter.get("/", findByHost);
-eventTypeRouter.get("/:id", validateParams(idParamSchema), findById);
-eventTypeRouter.post("/", validateBody(createEventTypeSchema), createEventType);
-eventTypeRouter.patch("/:id", validateParams(idParamSchema), validateBody(updateEventTypeSchema), updateEventType);
-eventTypeRouter.delete("/:id", validateParams(idParamSchema), deleteEventType);
+eventTypeRouter.use(requireUserId);
+
+eventTypeRouter.get('/', list);
+eventTypeRouter.get('/:id', getById);
+eventTypeRouter.post('/', validate(createEventTypeSchema), create);
+eventTypeRouter.patch('/:id', validate(updateEventTypeSchema), update);
+eventTypeRouter.delete('/:id', remove);
