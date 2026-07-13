@@ -7,7 +7,8 @@
     "dev": "nodemon --watch src --ext ts --exec \"pnpm tsx src/server.ts\"",
     "prisma:format": "pnpm prisma format",
     "prisma:migrate": "pnpm prisma migrate dev",
-    "prisma:generate": "pnpm prisma generate"
+    "prisma:generate": "pnpm prisma generate",
+    "prisma:all": "pnpm prisma format && pnpm prisma migrate dev && pnpm prisma generate"
   },
   "keywords": [],
   "author": "",

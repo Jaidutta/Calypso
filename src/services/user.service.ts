@@ -1,7 +1,7 @@
 import { getAll, getById, getUserByEmail, create, update, remove } from "../repositories/user.repository.js";
 import { conflict, notFound } from "../utils/api-errors.js";
 import { CreateUserDto, UpdateUserDto } from "../dtos/user.dto.js";
-
+import slug from 'slug';
 export async function findAllUsers() {
     const users = await getAll();
     return users;
@@ -24,8 +24,8 @@ export async function createUser(data: CreateUserDto) {
     if (userExists) {
         throw conflict(`User with email: ${data.email} already exists`);
     }
-    
-    const user = await create(data);
+    const slugPassed = data.slug ?? slug(data.name, {lower:  true})
+    const user = await create({...data, slug: slugPassed});
     return user;
 }
 

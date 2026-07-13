@@ -16,10 +16,17 @@ model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
   name      String
+  slug      String   @unique
+  timezone  String   @default("UTC") // 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt // allows prisma to manage automatically
 
-  eventType EventType[]
+  eventType              EventType[]
+  availabilityRules      AvailabilityRule[]
+  availabilityExceptions AvailabilityException[]
+
+  slots    Slot[]
+  bookings Booking[] @relation("HostBookings")
 
   @@map("users")
 }
@@ -40,9 +47,102 @@ model EventType {
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
+  slots    Slot[]
+  bookings Booking[]
+
   // id of the User table is present as a hostId in my table
   host User @relation(fields: [hostId], references: [id], onDelete: Cascade) // Cascade: If the user is deleted, all its eventTypes will be deleted
 
   @@unique([hostId, slug]) // this is a composite unique constraint (hostId, slug) must be unique
   @@map("event_types")
+}
+
+model AvailabilityRule {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  weekday   Int // 0-6 (0 being Sunday, 1 being Monday, etc)
+  startTime String // "09:00"
+  endTime   String // "17:00"
+  isActive  Boolean  @default(true)
+  timezone  String   @default("UTC")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt // prisma manages it automatically
+
+  // relationship to the User table
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // composite index to speed up queries for checking availability for a user on a specific day
+  @@index([userId, weekday])
+  @@map("availability_rules")
+}
+
+model AvailabilityException {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  date      DateTime @db.Date // <-- pointing Prisma that only store the date
+  type      String
+  startTime String?
+  endTime   String?
+  timezone  String   @default("UTC")
+  reason    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt // prisma manages it automatically
+
+  // relationship to the User table
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // composite index to speed up queries for checking availability for a user on a specific day
+  @@index([userId, date])
+  @@map("availability_exceptions")
+}
+
+model Slot {
+  id          String   @id @default(cuid())
+  hostId      Int
+  eventTypeId Int
+  startAt     DateTime
+  endAt       DateTime
+  status      String   @default("AVAILABLE") // available, booked, cancelled, completed
+  timezone    String   @default("UTC")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt // prisma manages it automatically
+
+  // relationship to the User table
+  host      User      @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  eventType EventType @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
+
+  bookings Booking[]
+
+  // composite index to speed up queries for 
+  @@unique([eventTypeId, startAt, endAt])
+  @@index([hostId, startAt])
+  @@index([eventTypeId, startAt, status])
+  @@map("slots")
+}
+
+model Booking {
+  id              Int       @id @default(autoincrement())
+  hostId          Int
+  eventTypeId     Int
+  slotId          String
+  inviteeEmail    String
+  inviteeNotes    String?
+  inviteeName     String
+  status          String    @default("PENDING")
+  meetLink        String?
+  calendarEventId String?
+  cancelledAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // naming relation
+  host      User      @relation("HostBookings", fields: [hostId], references: [id], onDelete: Cascade)
+  eventType EventType @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
+  slot      Slot      @relation(fields: [slotId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([inviteeEmail])
+  @@index([hostId, createdAt])
+  @@map("bookings")
 }
