@@ -1,7 +1,7 @@
 import { prisma } from "../config/database.js";
 import { CreateEventTypeDto, UpdateEventTypeDto } from "../dtos/event-type.dto.js";
 
-export async function getAllByHostId(hostId: number) {
+export async function findByHostId(hostId: number) {
     const eventTypes = await prisma.eventType
     .findMany({ 
         where: { hostId }, 
@@ -11,15 +11,21 @@ export async function getAllByHostId(hostId: number) {
 }
 
 export async function getById(id: number) {
-    return await prisma.eventType
+    const eventType = await prisma.eventType
     .findUnique({ 
         where: { id } 
     });
+    return eventType;
 }
 
-export async function create(hostId: number, data: CreateEventTypeDto) {
+export async function create(hostId: number, data: CreateEventTypeDto & { slug: string } ) {
+    // it wants an object with all the properties of create event type plus the slug property in it 
+    // which in not in createEventTypeDto
     const eventType =  await prisma.eventType.create({ 
-        data: { hostId, ...data } 
+        data: { 
+            hostId, 
+            ...data 
+        } 
     });
     return eventType;
 }
@@ -49,7 +55,7 @@ export async function findByHostIdAndSlug(hostId: number, slug: string) {
 }
 
 // a function that checks if a slug already exists for a host
-export async function existsByHostIdAndSlug(hostId: number, slug: string) {
+export async function slugExistsForHost(hostId: number, slug: string) {
     const eventType = await prisma.eventType
         .findFirst({
             where: {
@@ -58,4 +64,26 @@ export async function existsByHostIdAndSlug(hostId: number, slug: string) {
             } 
         });
     return eventType !== null;
+}
+
+
+export async function findActiveByHostIdAndEventSlug(hostId: number, slug: string) {
+    const eventType = await prisma.eventType.findFirst({
+        where: {
+            isActive: true,
+            slug,
+            hostId: hostId
+        }
+    });
+    return eventType;
+
+}
+
+export async function findActiveEventTypesByHost(hostId: number) {
+    return prisma.eventType.findMany({
+        where: {
+            hostId,
+            isActive: true,
+        }
+    })
 }
