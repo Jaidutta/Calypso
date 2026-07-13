@@ -47,10 +47,9 @@ export const createEventTypeSchema = z.object({
     
     slug: z
         .string()
-        .min(1, "Slug is required")
-        .max(100, "Slug cannot exceed 100 characters")
         .regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens")
-        
+        .optional()
+
         // why don't we have hostId here? It is because users are authenticated and userId is
         // injected into the request 
 });
